@@ -10,83 +10,60 @@ namespace Pract7_2
     
     internal class Program
     {
-        const string SOLUTION_NAME = "Pract7";
-
-        static private string FindGeneralDirectory()
-        {
-            string general = Directory.GetCurrentDirectory();
-            while (!general.EndsWith(SOLUTION_NAME))
-                general=Directory.GetParent(general).FullName;
-            return general;
-        }
-        static private void SaveDeviation(double[] array)
-        {
-            FileStream fileStream = new FileStream("G.dat", FileMode.Create, FileAccess.ReadWrite);
-            BinaryWriter binaryWriter = new BinaryWriter(fileStream);
-            for(int i = 0;i!=array.Length;++i)
-                binaryWriter.Write(array[i]);
-            binaryWriter.Close();
-            fileStream.Close();
-        }
-        static private void ReadDeviation(uint numbersCount=1)
-        {
-            
-            FileStream fileStream = new FileStream("G.dat", FileMode.Open, FileAccess.Read);
-            BinaryReader binaryReader = new BinaryReader(fileStream);
-
-
-            Console.ForegroundColor= ConsoleColor.Green;
-            Console.WriteLine("Saved deviation:");
-            Console.ResetColor();
-            for (int i = 0; i != numbersCount; ++i)
-                Console.WriteLine(binaryReader.ReadDouble());
-            binaryReader.Close();
-            fileStream.Close();
-        }
         static void Main(string[] args)
         {
+            if (!File.Exists("F.txt"))
+            {
+                Random random = new Random();
+                StreamWriter streamWriter = new StreamWriter(new FileStream("F.txt", FileMode.Create, FileAccess.Write));
+                for (int i = 0;i!=12;++i)
+                    streamWriter.WriteLine((-15+(double)random.Next(50)+(double)random.Next(100)/100).ToString());
+                streamWriter.Close();
+            }
+            if (!File.Exists("G.txt"))
+            {
+                FileStream fileStream=new FileStream("G.txt",FileMode.Create, FileAccess.Write);
+                fileStream.Close();
+            }
+
+            StreamReader streamReader = new StreamReader("F.txt");
+            Console.SetIn(streamReader);
+            StreamWriter streamWriter1 = new StreamWriter("G.txt");
+            Console.SetOut(streamWriter1);
+
+            double[] arr = new double[12];
             try
             {
-                if (File.Exists("F.dat"))
-                    File.Delete("F.dat");
-                File.Copy(Path.Combine(FindGeneralDirectory(), "Pract7_1\\bin\\Debug\\F.dat"), Path.Combine(Directory.GetCurrentDirectory(), "F.dat"));
-
-
-                double averageTemperature=0;
-                double [] temperature=new double[12];
-                FileStream fileStream = File.OpenRead("F.dat");
-                BinaryReader binReader = new BinaryReader(fileStream);
-
-
-
-                Console.WriteLine("Temperature:");
                 for(int i = 0;i!=12;++i)
-                {
-                    temperature[i] = binReader.ReadDouble();
-                    Console.WriteLine((i+1).ToString().PadLeft(2,' ')+ " "+temperature[i]);
-                    averageTemperature += temperature[i];
-                }
-                averageTemperature /= 12;
-                Console.WriteLine("Average temperature:"+ averageTemperature);
-
-                Console.WriteLine("Temperature deviation:");
-                for (int i = 0; i != 12; ++i)
-                {
-                    temperature[i] -= averageTemperature;
-                    Console.WriteLine(temperature[i]);
-                }
-
-
-                SaveDeviation(temperature);
-                ReadDeviation(12);
+                    arr[i]=Convert.ToDouble(Console.ReadLine());
             }
-            catch (Exception ex)
+            catch { }
+            streamReader.Close();
+            Console.SetIn(Console.In);
+
+            double averageTemperature = 0;
+            for(int i = 0;i!=12;++i)
+                averageTemperature += arr[i];
+            averageTemperature /= 12;
+            for (int i = 0; i != 12; ++i)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(ex.Message); 
-                Console.ResetColor();
+                if (averageTemperature < arr[i])
+                    arr[i] -= averageTemperature;
+                else
+                    arr[i] =-(averageTemperature - arr[i]);
+
             }
-            Console.ReadKey(false);
+                
+
+
+            for(int i = 0;i!=12; ++i)
+                Console.WriteLine(arr[i]);
+            streamWriter1.Close();
+            Console.SetOut(Console.Out);
+
+
+
+
         }
     }
 }
